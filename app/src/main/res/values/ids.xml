@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Commonly referenced view IDs -->
+    <item name="txtWelcomeParent" type="id" />
+    <item name="txtProgressOverview" type="id" />
+    <item name="addChildFab" type="id" />
+    <item name="fabReports" type="id" />
+    <item name="fabABCSong" type="id" />
+    <item name="btnLogoutAdmin" type="id" />
+    <item name="txtSystemAnalytics" type="id" />
+    <item name="userCard" type="id" />
+    <item name="chartsContainer" type="id" />
+    <item name="modulePerformanceText" type="id" />
+    <item name="userDistributionText" type="id" />
+    <item name="moduleGrid" type="id"/>
+    <item name="modulesContainer" type="id"/>
+    <item name="btnRegister" type="id"/>
+    <item name="btnSignIn" type="id"/>
+    <item name="btnLogout" type="id"/>
+    <item name="btnChangePassword" type="id"/>
+    <item name="btnRetry" type="id"/>
+    <item name="btnAddFirstChild" type="id"/>
+    <item name="btnAdmin" type="id"/>
+    <item name="loadingLayout" type="id"/>
+    <item name="txtForgotPassword" type="id"/>
+    <item name="profilesContainer" type="id"/>
+    <item name="imgLockIcon" type="id"/>
+    <item name="txtChildId" type="id"/>
+    <item name="txtStars" type="id"/>
+    <item name="imgAvatar" type="id"/>
+    <item name="txtLearningLevel" type="id"/>
+
+</resources>

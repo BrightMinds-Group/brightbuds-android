@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#FFF8BBD9"
+        android:pathData="M60,10a50,50 0,1 0,0 100a50,50 0,1 0,0 -100z"/>
+    <path
+        android:fillColor="#FFEC407A"
+        android:pathData="M60,35a25,25 0,1 0,0 50a25,25 0,1 0,0 -50z"/>
+    <path
+        android:fillColor="#FFEC407A"
+        android:pathData="M40,85c0,-11 8,-20 20,-20s20,9 20,20v5H40z"/>
+    <!-- Pigtails for sister -->
+    <path
+        android:fillColor="#FFEC407A"
+        android:pathData="M30,25a8,8 0,1 0,0 -16a8,8 0,1 0,0 16zM90,25a8,8 0,1 0,0 -16a8,8 0,1 0,0 16z"/>
+</vector>

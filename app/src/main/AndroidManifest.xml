@@ -1,0 +1,113 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+package="com.example.brightbuds_app">
+
+<!-- Permissions -->
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission
+    android:name="android.permission.FOREGROUND_SERVICE"
+    tools:ignore="ForegroundServicesPolicy" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+<application
+    android:allowBackup="true"
+    android:dataExtractionRules="@xml/data_extraction_rules"
+    android:fullBackupContent="@xml/backup_rules"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.BrightBudsApp">
+
+
+<!-- Splash Screen -->
+        <activity
+            android:name=".activities.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.BrightBudsApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Landing Page -->
+        <activity
+            android:name=".activities.LandingActivity"
+            android:label="BrightBuds"
+            android:exported="false"
+            android:theme="@style/Theme.BrightBudsApp" />
+
+        <!-- Role Selection (Netflix-style profiles) -->
+        <activity
+            android:name=".activities.RoleSelectionActivity"
+            android:label="Choose Profile"
+            android:exported="false"
+            android:theme="@style/Theme.BrightBudsApp" />
+
+        <!-- Authentication -->
+        <activity
+            android:name=".activities.LoginActivity"
+            android:label="Login"
+            android:exported="false"
+            android:theme="@style/Theme.BrightBudsApp" />
+        <activity
+            android:name=".activities.RegisterActivity"
+            android:label="Register"
+            android:exported="false"
+            android:theme="@style/Theme.BrightBudsApp" />
+
+        <!-- Dashboards -->
+        <activity
+            android:name=".activities.ParentDashboardActivity"
+            android:label="Parent Dashboard"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ChildDashboardActivity"
+            android:label="Child Dashboard"
+            android:exported="false" />
+
+        <!-- Child Management -->
+        <activity android:name=".activities.ChildSelectionActivity" /> <!-- ADD THIS LINE -->
+        <activity android:name=".activities.ChildProfileActivity" />
+        <activity android:name=".activities.AddChildActivity" />
+
+        <!-- Family Module -->
+        <activity
+            android:name=".activities.FamilyManagementActivity"
+            android:label="Manage Family"
+            android:parentActivityName=".activities.ParentDashboardActivity" />
+        <activity
+            android:name=".activities.FamilyModuleActivity"
+            android:label="Family Album"
+            android:parentActivityName=".activities.ParentDashboardActivity" />
+
+        <!-- Parent Profile -->
+        <activity
+            android:name=".activities.ParentProfileActivity"
+            android:label="My Profile"
+            android:parentActivityName=".activities.ParentDashboardActivity" />
+
+        <!-- Terms & Conditions -->
+        <activity
+            android:name=".activities.TermsConditionsActivity"
+            android:label="Terms &amp; Conditions"
+            android:exported="false"
+            android:theme="@style/Theme.BrightBudsApp"
+            android:parentActivityName=".activities.ParentProfileActivity" />
+
+
+        <!-- Learning & Utility Modules -->
+        <activity android:name=".activities.VideoModuleActivity" />
+        <activity android:name=".activities.ReportGenerationActivity" />
+        <activity android:name=".activities.GameModulesActivity" />
+        <activity android:name=".activities.ComingSoonActivity" />
+        <activity android:name=".activities.FeedMonsterActivity" />
+        <activity android:name=".activities.MatchLetterActivity" />
+        <activity android:name=".activities.MemoryMatchActivity" />
+        <activity android:name=".activities.WordBuilderActivity" />
+
+    </application>
+</manifest>

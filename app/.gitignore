@@ -1,0 +1,13 @@
+# Android / Gradle
+.idea/
+.gradle/
+build/
+local.properties
+*.iml
+/captures/
+.DS_Store
+
+# Firebase / Keys
+app/google-services.json
+app/src/main/java/com/example/brightbuds_app/utils/EncryptionUtil.java
+keys.properties

@@ -1,0 +1,16 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_soft_gradient"
+    android:gravity="center">
+
+    <!-- BrightBuds Logo -->
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_brightbuds_logo"
+        android:scaleType="centerCrop"
+        android:contentDescription="BrightBuds Logo" />
+</RelativeLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="165dp"
+    android:layout_height="165dp"
+    android:layout_margin="12dp"
+    android:background="@drawable/bg_child_tile"
+    android:elevation="8dp">
+
+    <!-- Module Icon -->
+    <ImageView
+        android:id="@+id/imgModuleIcon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:contentDescription="Module icon" />
+
+
+    <!-- Lock Overlay Icon (for locked modules) -->
+    <ImageView
+        android:id="@+id/imgLockIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_lock"
+        android:visibility="gone"
+        android:contentDescription="@string/locked_icon" />
+</FrameLayout>

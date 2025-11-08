@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- CardView Style - Fixed -->
+    <style name="BrightBudsCard" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">6dp</item>
+        <item name="cardBackgroundColor">@android:color/white</item>
+        <!-- Remove strokeColor since card_stroke doesn't exist -->
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <!-- MaterialButton Style -->
+    <style name="BrightBudsButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <!-- Remove font reference or use available font -->
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <!-- Outline Button Style -->
+    <style name="BrightBudsButton.Outline" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <!-- Remove font reference or use available font -->
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <!-- Title Text Style -->
+    <style name="BrightBudsTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">26sp</item>
+        <!-- Use available font or system font -->
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <!-- Subtitle Text Style -->
+    <style name="BrightBudsSubtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <!-- Use available font or system font -->
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+    </style>
+
+    <!-- Body Text Style -->
+    <style name="BrightBudsBody" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <!-- Use available font or system font -->
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+</resources>

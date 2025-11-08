@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">BrightBuds</string>
+    <string name="app_logo">BrightBuds Logo</string>
+
+    <!-- Common -->
+    <string name="parent_mode">Parent Dashboard</string>
+    <string name="child_mode">Child Learning</string>
+    <string name="settings">Settings</string>
+    <string name="reports">Reports</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="learning_progress">Learning Progress</string>
+    <string name="child_profile">Child Profile</string>
+    <string name="last_synced">Last Synced:</string>
+    <string name="music_enabled">Music Enabled</string>
+    <string name="sound_effects">Sound Effects</string>
+
+    <!-- Admin Dashboard -->
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="admin_description">Monitor app performance, usage, and system health.</string>
+    <string name="system_analytics">System Analytics</string>
+    <string name="total_users">Total Users: 150</string>
+    <string name="active_users">Active Users: 120</string>
+    <string name="engagement_rate">Engagement Rate: 85%</string>
+    <string name="module_performance">Module Performance</string>
+    <string name="top_module">Top Module: ABC Song (92%)</string>
+    <string name="popular_module">Most Popular: Feed the Monster</string>
+    <string name="improvement_area">Area for Improvement: Word Builder</string>
+    <string name="reports_logs">Reports and Logs</string>
+    <string name="generate_report">Generate Analytics Report</string>
+    <string name="view_logs">View System Logs</string>
+    <string name="system_maintenance">System Maintenance</string>
+    <string name="sync_all_data">Sync All Data</string>
+    <string name="clean_reports">Clean Old Reports</string>
+    <string name="last_updated">Last Updated: Just now</string>
+    <string name="locked_icon">Locked icon</string>
+
+    <!-- Parent Dashboard -->
+    <string name="parent_dashboard">Parent Dashboard</string>
+    <string name="notifications">Notifications</string>
+    <string name="add_child">Add Child</string>
+    <string name="generate_reports">Generate Reports</string>
+
+    <!-- Child Profile -->
+    <string name="save_child_button_text">Save Child Profile</string>
+    <string name="saving_button_text">Saving...</string>
+
+    <string name="terms_and_conditions_title">Terms &amp; Conditions</string>
+    <string name="terms_and_conditions_content">
+    <![CDATA[
+    <h2>BrightBuds – Terms and Conditions</h2>
+
+    <p><strong>Last Updated:</strong> November 2025</p>
+
+    <h3>1. Purpose of the App</h3>
+    <p>BrightBuds is an educational mobile application designed for early childhood learning. It combines songs, interactive games, and progress tracking tools to support literacy and numeracy development in children aged 2 to 6.</p>
+
+    <h3>2. Parental Responsibility and Consent</h3>
+    <ul>
+        <li>Only verified parents or guardians may create and manage child profiles.</li>
+        <li>Parental consent is required before any child information is created or stored.</li>
+        <li>Parents are responsible for monitoring their child’s activities and securing their devices.</li>
+        <li>Each parent account may register up to five child profiles.</li>
+    </ul>
+
+    <h3>3. Privacy and Data Protection</h3>
+    <ul>
+        <li>BrightBuds complies with COPPA and follows strict data-minimisation practices.</li>
+        <li>Personal data (child names, photos, words) is encrypted locally using AES-256.</li>
+        <li>Only anonymised learning metrics are synced to Firebase for reporting.</li>
+        <li>Parents may review or delete their child’s data at any time from the dashboard.</li>
+        <li>No advertising, third-party tracking, or data selling occurs in BrightBuds.</li>
+    </ul>
+
+    <h3>4. Offline and Online Use</h3>
+    <p>All modules work offline using local SQLite storage. When internet connectivity is restored, data automatically synchronises with Firebase using timestamp-based conflict resolution to ensure consistency.</p>
+
+    <h3>5. Security Measures</h3>
+    <ul>
+        <li>All network communication is protected with HTTPS/TLS encryption.</li>
+        <li>Database integrity is enforced through unique identifiers and foreign-key constraints.</li>
+        <li>Administrative actions are logged and auditable.</li>
+        <li>Backups and recovery snapshots prevent data loss or corruption.</li>
+    </ul>
+
+    <h3>6. Accessibility and Inclusivity</h3>
+    <ul>
+        <li>The interface follows WCAG accessibility standards with clear icons and high-contrast colors.</li>
+        <li>Voice prompts support children who are not yet readers or have learning differences.</li>
+        <li>Parents may customise modules with family photos or local language content.</li>
+    </ul>
+
+    <h3>7. Acceptable Use</h3>
+    <p>Users agree to use BrightBuds solely for educational and non-commercial purposes, not to modify or distribute the application’s content, and to report any bugs or security issues responsibly.</p>
+
+    <h3>8. Content and Intellectual Property</h3>
+    <p>All learning materials, games, graphics, and songs are the intellectual property of the BrightBuds Team. Unauthorised reproduction or redistribution is prohibited.</p>
+
+    <h3>9. Data Retention and Deletion</h3>
+    <ul>
+        <li>Data is retained only while the parent account is active.</li>
+        <li>Deleting a child profile removes associated progress data permanently.</li>
+        <li>Backup data is automatically purged within 30 days of deletion.</li>
+    </ul>
+
+    <h3>10. Limitation of Liability</h3>
+    <p>BrightBuds is provided “as is” for educational use. The developers are not responsible for data loss, misuse, or device issues resulting from user error or unauthorised modification.</p>
+
+    <h3>11. Updates to These Terms</h3>
+    <p>These Terms and Conditions may be updated periodically to reflect legal or feature changes. Parents will be notified of significant updates through the Parent Dashboard.</p>
+
+    <h3>12. Contact Information</h3>
+    <p>For support or privacy enquiries, contact us at <strong>khalirendwe96@gmail.com</strong>.</p>
+    ]]>
+</string>
+
+</resources>
