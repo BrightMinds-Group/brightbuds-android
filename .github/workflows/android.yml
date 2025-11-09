@@ -35,13 +35,22 @@ jobs:
           ndk: 25.2.9519653
           cache: gradle
 
-      # Safe fallback if google-services.json is missing
+      # Securely restore google-services.json from GitHub secret
+      - name: Decode google-services.json from secret
+        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+          echo "Firebase config restored successfully."
+
+      # Fallback: create placeholder if secret not found
       - name: Create placeholder google-services.json
+        if: ${{ secrets.GOOGLE_SERVICES_JSON == '' }}
         run: |
           mkdir -p app
           echo '{ "project_info": { "project_id": "brightbuds-placeholder" } }' > app/google-services.json
+          echo "Using placeholder google-services.json (Firebase features disabled)."
 
-      # Build only the debug APK (skip lint/tests for speed)
+      # ⚙Build Debug APK (skip lint and tests for faster CI)
       - name: Build Debug APK
         run: ./gradlew assembleDebug -x lint -x test
 
