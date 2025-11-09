@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        android:contentDescription="@string/app_name" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <GridLayout
+                android:id="@+id/dashboardGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:columnCount="2"
+                android:alignmentMode="alignMargins">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_blue_bordered"
+                    android:src="@drawable/abc_icon"
+                    android:contentDescription="ABC" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_blue_bordered"
+                    android:src="@drawable/one_two_three_icon"
+                    android:contentDescription="123" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_light_green"
+                    android:src="@drawable/family_icon"
+                    android:contentDescription="Family" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_orange"
+                    android:src="@drawable/monster_icon"
+                    android:contentDescription="Monster" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_yellow"
+                    android:src="@drawable/pencil_icon"
+                    android:contentDescription="Pencil" />
+
+                <ImageView
+                    android:id="@+id/matchLetterIcon"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_teal"
+                    android:src="@drawable/aa_icon"
+                    android:contentDescription="Letters" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="fill_horizontal"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
+                    android:padding="24dp"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/dashboard_tile_cream"
+                    android:src="@drawable/apple_star_icon"
+                    android:contentDescription="Apple Star" />
+
+            </GridLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
