@@ -35,7 +35,6 @@ public class PDFReportService {
 
     public void setDateRange(long start, long end) { this.startTimestamp = start; this.endTimestamp = end; }
 
-    /** ADMIN REPORT */
     public void generateAdminProgressReport(List<Progress> list, double avg, int total,
                                             String generatedBy, Map<String, String> childNames,
                                             Map<String, String> parentNames, PDFCallback cb) {
@@ -87,7 +86,6 @@ public class PDFReportService {
         }
     }
 
-    /** PARENT REPORT */
     public void generateProgressReport(List<Progress> list, double avg, int total,
                                        String parentName, Map<String, String> childNames, PDFCallback cb) {
         File file = createReportFile("BrightBuds_Family_Report");
@@ -164,7 +162,6 @@ public class PDFReportService {
         }
     }
 
-    /** HELPERS  */
     private String decryptChildName(String val) {
         String dec = EncryptionUtil.decrypt(val);
         return (dec != null && !dec.isEmpty()) ? dec : val;
@@ -186,6 +183,7 @@ public class PDFReportService {
             case "module_memory_match": return "Memory Match";
             case "module_word_builder": return "Word Builder";
             case "module_my_family": return "My Family Album";
+            case "game_shapes_match": return "Shapes Match"; // new id display
             default:
                 String dec = EncryptionUtil.decrypt(id);
                 return (dec != null && !dec.isEmpty()) ? dec : id;

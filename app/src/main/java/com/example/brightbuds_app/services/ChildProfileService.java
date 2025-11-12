@@ -1,7 +1,6 @@
 package com.example.brightbuds_app.services;
 
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.example.brightbuds_app.interfaces.DataCallbacks;

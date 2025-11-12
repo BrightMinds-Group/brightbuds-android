@@ -105,6 +105,8 @@
                 <activity android:name=".activities.MatchLetterActivity" />
                 <activity android:name=".activities.MemoryMatchActivity" />
                 <activity android:name=".activities.WordBuilderActivity" />
-
+                <activity
+                    android:name=".activities.ShapesMatchActivity"
+                    android:exported="false" />
         </application>
 </manifest>

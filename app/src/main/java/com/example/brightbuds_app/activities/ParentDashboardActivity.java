@@ -43,7 +43,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -55,18 +54,15 @@ public class ParentDashboardActivity extends AppCompatActivity {
 
     private static final String TAG = "ParentDashboard";
 
-    // UI components
     private TextView txtWelcome;
     private LinearLayout childrenContainer;
 
-    // Firebase + services
     private String parentId;
     private AuthServices authService;
     private ChildProfileService childService;
     private ProgressService progressService;
     private FirebaseFirestore db;
 
-    // Safety flag to prevent duplicate loading
     private boolean isLoadingChildren = false;
 
     @Override
@@ -74,7 +70,6 @@ public class ParentDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent_dashboard);
 
-        // Check if user is logged in
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show();
@@ -83,10 +78,8 @@ public class ParentDashboardActivity extends AppCompatActivity {
             return;
         }
 
-        // Get parent ID
         parentId = currentUser.getUid();
 
-        // Initialize services
         authService = new AuthServices(this);
         childService = new ChildProfileService();
         progressService = new ProgressService(this);
@@ -95,57 +88,47 @@ public class ParentDashboardActivity extends AppCompatActivity {
         txtWelcome = findViewById(R.id.txtWelcomeParent);
         childrenContainer = findViewById(R.id.childrenContainer);
 
-        // Load and decrypt parent name for welcome message
         loadParentNameForWelcome();
 
-        // Manage Family button
         MaterialButton btnManageFamily = findViewById(R.id.btnManageFamily);
         btnManageFamily.setOnClickListener(v ->
                 startActivity(new Intent(this, FamilyManagementActivity.class)));
 
-        // Bottom navigation bar
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnItemSelectedListener(this::onBottomNavSelected);
 
-        Log.d(TAG, "✅ ParentDashboard loaded for parent: " + parentId);
+        Log.d(TAG, "ParentDashboard loaded for parent: " + parentId);
     }
 
-    /** Load and decrypt parent name for welcome message */
     private void loadParentNameForWelcome() {
         db.collection("users").document(parentId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // 🔓 Decrypt parent name
                         String encryptedName = documentSnapshot.getString("name");
                         String encryptedFullName = documentSnapshot.getString("fullName");
 
                         String decryptedName = EncryptionUtil.decrypt(encryptedName);
                         String decryptedFullName = EncryptionUtil.decrypt(encryptedFullName);
 
-                        // Use decrypted name for welcome message
                         String displayName = !TextUtils.isEmpty(decryptedName) ? decryptedName :
                                 !TextUtils.isEmpty(decryptedFullName) ? decryptedFullName :
                                         "Parent";
 
                         txtWelcome.setText("Welcome back " + displayName + "!");
-
-                        Log.d(TAG, "✅ Parent name decrypted: " + displayName);
+                        Log.d(TAG, "Parent name decrypted: " + displayName);
                     } else {
-                        // Fallback to Firebase Auth display name
                         String parentName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
                         txtWelcome.setText("Welcome back " + (parentName != null ? parentName : "Parent") + "!");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "❌ Failed to load parent name", e);
-                    // Fallback to Firebase Auth display name
+                    Log.e(TAG, "Failed to load parent name", e);
                     String parentName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
                     txtWelcome.setText("Welcome back " + (parentName != null ? parentName : "Parent") + "!");
                 });
     }
 
-    // Handle bottom navigation clicks
     private boolean onBottomNavSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
@@ -172,33 +155,28 @@ public class ParentDashboardActivity extends AppCompatActivity {
         return false;
     }
 
-    // Load children and their progress with safety flag
     private void loadChildrenAndProgress() {
-        // Prevent duplicate calls
         if (isLoadingChildren) {
-            Log.d(TAG, "⏳ Skipping duplicate loadChildrenAndProgress call");
+            Log.d(TAG, "Skipping duplicate loadChildrenAndProgress call");
             return;
         }
         isLoadingChildren = true;
 
         childrenContainer.removeAllViews();
 
-        // Show loading spinner while fetching data
         View loadingView = getLayoutInflater().inflate(R.layout.item_loading_children, childrenContainer, false);
         childrenContainer.addView(loadingView);
 
-        Log.d(TAG, "🔄 Loading children and progress data...");
+        Log.d(TAG, "Loading children and progress data");
 
-        // Get children for logged-in parent
         childService.getChildrenForCurrentParent(new DataCallbacks.ChildrenListCallback() {
             @Override
             public void onSuccess(List<ChildProfile> children) {
                 childrenContainer.removeAllViews();
 
-                Log.d(TAG, "✅ Loaded " + children.size() + " children");
+                Log.d(TAG, "Loaded " + children.size() + " children");
 
                 if (children.isEmpty()) {
-                    // Show empty state
                     View emptyView = getLayoutInflater().inflate(R.layout.item_empty_children, childrenContainer, false);
                     childrenContainer.addView(emptyView);
                     loadModuleOverviewChart(new ArrayList<>());
@@ -206,29 +184,24 @@ public class ParentDashboardActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Collect all child IDs
                 List<String> childIds = new ArrayList<>();
                 for (ChildProfile child : children) childIds.add(child.getChildId());
 
-                // Get progress data for these children
                 progressService.getAllProgressForParentWithChildren(parentId, childIds, new ProgressListCallback() {
                     @Override
                     public void onSuccess(List<Progress> progressList) {
-                        Log.d(TAG, "✅ Loaded " + progressList.size() + " progress records");
+                        Log.d(TAG, "Loaded " + progressList.size() + " progress records");
 
-                        // Display child cards
                         for (ChildProfile child : children) {
                             childrenContainer.addView(createChildCard(child, progressList));
                         }
-                        // Load bar graph for module overview
                         loadModuleOverviewChart(progressList);
                         isLoadingChildren = false;
                     }
 
                     @Override
                     public void onFailure(Exception e) {
-                        Log.e(TAG, "❌ Failed to load progress", e);
-                        // Still show children without progress
+                        Log.e(TAG, "Failed to load progress", e);
                         for (ChildProfile child : children) {
                             childrenContainer.addView(createChildCard(child, new ArrayList<>()));
                         }
@@ -241,9 +214,8 @@ public class ParentDashboardActivity extends AppCompatActivity {
             @Override
             public void onFailure(Exception e) {
                 childrenContainer.removeAllViews();
-                Log.e(TAG, "❌ Failed to load children", e);
+                Log.e(TAG, "Failed to load children", e);
 
-                // Show error state
                 View errorView = getLayoutInflater().inflate(R.layout.item_error_children, childrenContainer, false);
                 childrenContainer.addView(errorView);
                 loadModuleOverviewChart(new ArrayList<>());
@@ -252,12 +224,10 @@ public class ParentDashboardActivity extends AppCompatActivity {
         });
     }
 
-    // Module Overview Bar Chart
     private void loadModuleOverviewChart(List<Progress> progressList) {
         BarChart chart = findViewById(R.id.moduleOverviewChart);
         if (chart == null) return;
 
-        // All modules with default types
         Map<String, String> moduleTypes = new HashMap<>();
         moduleTypes.put("module_123_song", "video");
         moduleTypes.put("module_abc_song", "video");
@@ -266,19 +236,17 @@ public class ParentDashboardActivity extends AppCompatActivity {
         moduleTypes.put("module_memory_match", "game");
         moduleTypes.put("module_word_builder", "game");
         moduleTypes.put("module_my_family", "game");
+        moduleTypes.put("game_shapes_match", "game"); // new module id
 
-        // Track module values
         Map<String, Integer> moduleValues = new HashMap<>();
         for (String module : moduleTypes.keySet()) moduleValues.put(module, 0);
 
-        Log.d(TAG, "🎯 Progress list size: " + progressList.size());
+        Log.d(TAG, "Progress list size: " + progressList.size());
 
-        // Go through all progress records
         for (Progress progress : progressList) {
             String moduleId = progress.getModuleId();
             if (moduleId == null || !moduleTypes.containsKey(moduleId)) continue;
 
-            // Prefer Firestore 'type' field if present
             String type = progress.getType() != null ? progress.getType() : moduleTypes.get(moduleId);
 
             if ("video".equals(type)) {
@@ -289,10 +257,9 @@ public class ParentDashboardActivity extends AppCompatActivity {
                 moduleValues.put(moduleId, Math.max(moduleValues.get(moduleId), score));
             }
 
-            Log.d(TAG, "📘 Module=" + moduleId + " | Type=" + type + " | Plays=" + progress.getPlays() + " | Score=" + progress.getScore());
+            Log.d(TAG, "Module=" + moduleId + " | Type=" + type + " | Plays=" + progress.getPlays() + " | Score=" + progress.getScore());
         }
 
-        // Prepare chart entries
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         int index = 0;
@@ -304,7 +271,8 @@ public class ParentDashboardActivity extends AppCompatActivity {
                 "module_match_the_letter",
                 "module_memory_match",
                 "module_word_builder",
-                "module_my_family"
+                "module_my_family",
+                "game_shapes_match"   // new
         };
 
         for (String id : order) {
@@ -355,10 +323,9 @@ public class ParentDashboardActivity extends AppCompatActivity {
         chart.animateY(1000);
         chart.invalidate();
 
-        Log.d(TAG, "✅ Chart loaded successfully with " + entries.size() + " modules");
+        Log.d(TAG, "Chart loaded with " + entries.size() + " modules");
     }
 
-    // Format module names for chart labels
     private String formatModuleLabel(String id) {
         switch (id) {
             case "module_123_song": return "123 Song";
@@ -368,11 +335,11 @@ public class ParentDashboardActivity extends AppCompatActivity {
             case "module_memory_match": return "Memory Match";
             case "module_word_builder": return "Word Builder";
             case "module_my_family": return "My Family";
+            case "game_shapes_match": return "Shapes Match";
             default: return id;
         }
     }
 
-    // Create a card for each child (with progress % and stars)
     private CardView createChildCard(ChildProfile child, List<Progress> progressList) {
         CardView card = (CardView) getLayoutInflater().inflate(R.layout.item_child_card_attractive, childrenContainer, false);
 
@@ -383,12 +350,10 @@ public class ParentDashboardActivity extends AppCompatActivity {
         ProgressBar progressBar = card.findViewById(R.id.progressBar);
         LinearLayout achievementsLayout = card.findViewById(R.id.layoutAchievements);
 
-        // Use displayName with fallback to name
         String displayName = child.getDisplayName() != null ? child.getDisplayName() : child.getName();
         name.setText(displayName);
         age.setText(child.getAge() + " years old");
 
-        // Load avatar (fallback placeholder)
         if (child.getAvatarUrl() != null && !child.getAvatarUrl().isEmpty()) {
             Glide.with(this)
                     .load(child.getAvatarUrl())
@@ -400,39 +365,31 @@ public class ParentDashboardActivity extends AppCompatActivity {
             avatar.setImageResource(R.drawable.ic_child_avatar_placeholder);
         }
 
-        // Calculate completion percentage based on 7 total modules
         int totalModules = 7;
         int completedModules = 0;
         int starsEarned = 0;
 
         if (progressList != null && !progressList.isEmpty()) {
             for (Progress p : progressList) {
-                if (p == null || p.getModuleId() == null || !p.getChildId().equals(child.getChildId())) {
-                    continue;
-                }
+                if (p == null || p.getModuleId() == null || !p.getChildId().equals(child.getChildId())) continue;
 
-                // If video was played or game scored above 0, count as completed
                 if ("video".equalsIgnoreCase(p.getType()) && p.getPlays() > 0) {
                     completedModules++;
                 } else if (p.getScore() > 0) {
                     completedModules++;
                 }
 
-                // Award star if score ≥ 80
                 if (p.getScore() >= 80) {
                     starsEarned++;
                 }
             }
         }
 
-        // Compute and cap progress
         int percentage = (int) Math.round((completedModules / (double) totalModules) * 100);
-        percentage = Math.min(percentage, 100); // cap at 100%
+        percentage = Math.min(percentage, 100);
 
-        // Compute and cap stars (max 5)
         int starsEarnedCapped = Math.min(starsEarned, 5);
 
-        // Update progress UI cleanly
         if (completedModules == 0) {
             progressText.setText("New to BrightBuds!");
             progressText.setTextColor(Color.parseColor("#666666"));
@@ -442,17 +399,15 @@ public class ParentDashboardActivity extends AppCompatActivity {
             progressBar.setProgress(percentage);
             progressBar.setVisibility(View.VISIBLE);
 
-            // Color-code progress
             if (percentage >= 80) {
-                progressText.setTextColor(Color.parseColor("#4CAF50")); // green
+                progressText.setTextColor(Color.parseColor("#4CAF50"));
             } else if (percentage >= 50) {
-                progressText.setTextColor(Color.parseColor("#FFC107")); // amber
+                progressText.setTextColor(Color.parseColor("#FFC107"));
             } else {
-                progressText.setTextColor(Color.parseColor("#F44336")); // red
+                progressText.setTextColor(Color.parseColor("#F44336"));
             }
         }
 
-        // Stars display (always capped at 5)
         achievementsLayout.removeAllViews();
         if (starsEarnedCapped > 0) {
             for (int i = 0; i < starsEarnedCapped; i++) {
@@ -472,12 +427,11 @@ public class ParentDashboardActivity extends AppCompatActivity {
             achievementsLayout.addView(noStar);
         }
 
-        // On-click select feedback
         card.setOnClickListener(v -> {
             SharedPreferences prefs = getSharedPreferences("BrightBudsPrefs", MODE_PRIVATE);
             prefs.edit()
                     .putString("selectedChildId", child.getChildId())
-                    .putString("selectedChildName", displayName) // Use the correct display name
+                    .putString("selectedChildName", displayName)
                     .apply();
 
             card.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
@@ -492,8 +446,8 @@ public class ParentDashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "🔄 Refreshing dashboard data");
+        Log.d(TAG, "Refreshing dashboard data");
         progressService.autoSyncOfflineProgress();
-        loadChildrenAndProgress(); // Refresh dashboard
+        loadChildrenAndProgress();
     }
 }

@@ -16,25 +16,10 @@
     <string name="music_enabled">Music Enabled</string>
     <string name="sound_effects">Sound Effects</string>
 
-    <!-- Admin Dashboard -->
-    <string name="admin_dashboard">Admin Dashboard</string>
-    <string name="admin_description">Monitor app performance, usage, and system health.</string>
-    <string name="system_analytics">System Analytics</string>
-    <string name="total_users">Total Users: 150</string>
-    <string name="active_users">Active Users: 120</string>
-    <string name="engagement_rate">Engagement Rate: 85%</string>
-    <string name="module_performance">Module Performance</string>
-    <string name="top_module">Top Module: ABC Song (92%)</string>
-    <string name="popular_module">Most Popular: Feed the Monster</string>
-    <string name="improvement_area">Area for Improvement: Word Builder</string>
-    <string name="reports_logs">Reports and Logs</string>
-    <string name="generate_report">Generate Analytics Report</string>
-    <string name="view_logs">View System Logs</string>
-    <string name="system_maintenance">System Maintenance</string>
-    <string name="sync_all_data">Sync All Data</string>
-    <string name="clean_reports">Clean Old Reports</string>
-    <string name="last_updated">Last Updated: Just now</string>
-    <string name="locked_icon">Locked icon</string>
+
+    <!-- accessibility label for a locked module icon -->
+    <string name="locked_icon">Locked</string>
+
 
     <!-- Parent Dashboard -->
     <string name="parent_dashboard">Parent Dashboard</string>
@@ -61,7 +46,7 @@
         <li>Only verified parents or guardians may create and manage child profiles.</li>
         <li>Parental consent is required before any child information is created or stored.</li>
         <li>Parents are responsible for monitoring their child’s activities and securing their devices.</li>
-        <li>Each parent account may register up to five child profiles.</li>
+
     </ul>
 
     <h3>3. Privacy and Data Protection</h3>
@@ -111,7 +96,7 @@
     <p>These Terms and Conditions may be updated periodically to reflect legal or feature changes. Parents will be notified of significant updates through the Parent Dashboard.</p>
 
     <h3>12. Contact Information</h3>
-    <p>For support or privacy enquiries, contact us at <strong>khalirendwe96@gmail.com</strong>.</p>
+    <p>For support or privacy enquiries, contact us at <strong>info@BrightMinds.com</strong>.</p>
     ]]>
 </string>
 

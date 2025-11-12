@@ -345,4 +345,77 @@ public class ProgressService {
 
     public void autoSyncOfflineProgress() {
     }
+
+    /*
+ Records a game session for any game module with detailed metrics.
+ Writes to Firestore using merge to preserve history and supports offline cache.
+ Also inserts or updates a local SQLite row so the dashboard can reflect progress instantly.
+
+ Fields saved online:
+   parentId, childId, moduleId, type="game", score, status, completionStatus,
+   timestamp, timeSpent, plays, correct, incorrect, stars, lastUpdated
+
+ Local cache uses DatabaseHelper.insertOrUpdateProgress to store a minimal row with timeSpent.
+*/
+    public void recordGameSession(String childId,
+                                  String moduleId,
+                                  int score,
+                                  long timeSpentMs,
+                                  int stars,
+                                  int correct,
+                                  int incorrect,
+                                  int plays,
+                                  DataCallbacks.GenericCallback callback) {
+
+        var user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            callback.onFailure(new IllegalStateException("User not authenticated"));
+            return;
+        }
+        if (childId == null || moduleId == null) {
+            callback.onFailure(new IllegalArgumentException("Missing childId or moduleId"));
+            return;
+        }
+
+        final String parentId = user.getUid();
+        final String docId = childId + "_" + moduleId;
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("parentId", parentId);
+        data.put("childId", childId);
+        data.put("moduleId", moduleId);
+        data.put("type", "game");
+        data.put("score", score);
+        data.put("status", score >= 70 ? "completed" : "in_progress");
+        data.put("completionStatus", score >= 70);
+        data.put("timestamp", System.currentTimeMillis());
+        data.put("lastUpdated", System.currentTimeMillis());
+        data.put("timeSpent", Math.max(0L, timeSpentMs));
+        data.put("plays", Math.max(1, plays));
+        data.put("correct", Math.max(0, correct));
+        data.put("incorrect", Math.max(0, incorrect));
+        data.put("stars", Math.max(0, stars));
+
+        // Online write with merge to keep cumulative counters
+        db.collection("child_progress")
+                .document(docId)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(unused -> {
+                    // Local cache update for offline-first dashboard
+                    cacheProgressRecord(docId, parentId, childId, moduleId,
+                            score, (score >= 70 ? "completed" : "in_progress"), true);
+
+                    // Update child-level stats after progress write
+                    updateChildProgressStats(childId);
+
+                    callback.onSuccess("Game session recorded");
+                })
+                .addOnFailureListener(e -> {
+                    // Cache local if Firestore write fails
+                    cacheProgressRecord(docId, parentId, childId, moduleId,
+                            score, (score >= 70 ? "completed" : "in_progress"), false);
+                    callback.onFailure(e);
+                });
+    }
+
 }

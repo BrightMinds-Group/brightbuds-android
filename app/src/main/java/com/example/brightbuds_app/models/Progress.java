@@ -1,12 +1,12 @@
 package com.example.brightbuds_app.models;
 
+import com.example.brightbuds_app.utils.Constants;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 
 /**
- * Progress:
- * Represents each child's activity and learning progress record in Firestore.
- * Includes helper logic for determining completion and module name mapping.
+ * Progress model for child learning activity tracking.
+ * Includes flexible timestamp handling and completion checks.
  */
 public class Progress {
 
@@ -19,18 +19,14 @@ public class Progress {
     private long timeSpent;
     private long timestamp;
 
-    // Firestore fields for analytics and charting
     private int plays;
     private String type;
     private boolean completionStatus;
 
-    // Flexible lastUpdated field — handles both Timestamp & Long
     private Object lastUpdated;
 
-    // Default constructor (Firestore)
     public Progress() {}
 
-    // --- Firestore Mappings ---
     @PropertyName("progressId")
     public String getProgressId() { return progressId; }
     @PropertyName("progressId")
@@ -91,23 +87,17 @@ public class Progress {
     @PropertyName("lastUpdated")
     public void setLastUpdated(Object lastUpdated) { this.lastUpdated = lastUpdated; }
 
-    // Timestamp utility
     public Timestamp getLastUpdatedTimestamp() {
-        if (lastUpdated instanceof Timestamp) {
-            return (Timestamp) lastUpdated;
-        } else if (lastUpdated instanceof Long) {
-            return new Timestamp(((Long) lastUpdated) / 1000, 0);
-        }
+        if (lastUpdated instanceof Timestamp) return (Timestamp) lastUpdated;
+        if (lastUpdated instanceof Long) return new Timestamp(((Long) lastUpdated) / 1000, 0);
         return null;
     }
 
-    // Completion helper
     /**
-     * Determines whether this progress record represents a completed module.
-     * A module is considered completed if:
-     *  - completionStatus == true, or
-     *  - score >= 70, or
-     *  - status equals "completed"
+     * Completion rules:
+     * 1) completionStatus true
+     * 2) score >= 70
+     * 3) status equals "completed"
      */
     public boolean isModuleCompleted() {
         if (completionStatus) return true;
@@ -115,30 +105,11 @@ public class Progress {
         return status != null && status.equalsIgnoreCase("completed");
     }
 
-    // Module Name Mapping (for reports and charts)
+    /** Display name resolved via Constants to support legacy and new ids */
     public String getModuleName() {
-        if (moduleId == null) return "Unknown Module";
-        switch (moduleId.toLowerCase()) {
-            case "module_abc_song":
-                return "ABC Song";
-            case "module_123_song":
-                return "123 Song";
-            case "module_feed_the_monster":
-                return "Feed the Monster";
-            case "module_match_the_letter":
-                return "Match the Letter";
-            case "module_memory_match":
-                return "Memory Match";
-            case "module_word_builder":
-                return "Word Builder";
-            case "module_my_family":
-                return "My Family Album";
-            default:
-                return moduleId; // fallback if unrecognized
-        }
+        return Constants.getModuleDisplayName(moduleId);
     }
 
-    // toString() for debugging
     @Override
     public String toString() {
         return "Progress{" +

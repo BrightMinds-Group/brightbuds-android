@@ -16,7 +16,6 @@
             android:id="@+id/txtChildGreeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Learning Games"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/primary"

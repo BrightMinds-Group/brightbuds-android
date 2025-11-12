@@ -18,6 +18,7 @@ import com.example.brightbuds_app.R;
 import com.example.brightbuds_app.interfaces.DataCallbacks;
 import com.example.brightbuds_app.models.ChildProfile;
 import com.example.brightbuds_app.services.ChildProfileService;
+import com.example.brightbuds_app.utils.EncryptionUtil;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 /**
  * ChildSelectionActivity
  * Allows child users to select their profile
+ * Decrypts child name before showing
  */
 public class ChildSelectionActivity extends AppCompatActivity {
 
@@ -80,10 +82,17 @@ public class ChildSelectionActivity extends AppCompatActivity {
         TextView txtChildName = card.findViewById(R.id.txtChildName);
         TextView txtChildAge = card.findViewById(R.id.txtChildAge);
 
-    // ✅ Show decrypted display name
-        txtChildName.setText(child.getDisplayName());
-        txtChildAge.setText(child.getAge() + " years old");
+        // Safely decrypt display name
+        String decryptedName = EncryptionUtil.decrypt(child.getDisplayName());
+        if (decryptedName == null || decryptedName.isEmpty()) {
+            decryptedName = EncryptionUtil.decrypt(child.getName());
+        }
+        if (decryptedName == null || decryptedName.isEmpty()) {
+            decryptedName = "Child";
+        }
 
+        txtChildName.setText(decryptedName);
+        txtChildAge.setText(child.getAge() + " years old");
 
         // Load avatar if available
         if (child.getAvatarUrl() != null && !child.getAvatarUrl().isEmpty()) {
@@ -102,6 +111,7 @@ public class ChildSelectionActivity extends AppCompatActivity {
     private void startChildDashboard(ChildProfile child) {
         Intent intent = new Intent(this, ChildDashboardActivity.class);
         intent.putExtra("childId", child.getChildId());
+        // Pass encrypted name (will be decrypted again in ChildDashboardActivity)
         intent.putExtra("childName", child.getName());
         startActivity(intent);
         finish();

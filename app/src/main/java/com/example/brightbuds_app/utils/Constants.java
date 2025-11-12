@@ -1,5 +1,7 @@
 package com.example.brightbuds_app.utils;
 
+import com.example.brightbuds_app.BuildConfig;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -8,10 +10,9 @@ import java.util.Map;
  Centralized constants and configuration for the BrightBuds application.
  All static configuration values, limits, and display parameters are defined here.
  This class should never be instantiated.
- */
+*/
 public final class Constants {
 
-    // Prevent instantiation
     private Constants() {
         throw new UnsupportedOperationException("Constants class should not be instantiated");
     }
@@ -20,14 +21,13 @@ public final class Constants {
     public static final String APP_NAME = "BrightBuds";
     public static final String APP_VERSION = "1.0.0";
     public static final int APP_VERSION_CODE = 1;
-    private static com.google.firebase.BuildConfig BuildConfig;
     public static final boolean IS_DEBUG = BuildConfig.DEBUG;
 
     // FIREBASE CONFIGURATION
     public static final String FIREBASE_PROJECT_ID = "brightbuds-app";
-    public static final long STORAGE_MAX_RETRY_TIME = 60000L; // 1 minute
+    public static final long STORAGE_MAX_RETRY_TIME = 60000L;
     public static final int FIRESTORE_MAX_RETRIES = 3;
-    public static final long FIRESTORE_TIMEOUT_MS = 10000L; // 10 seconds
+    public static final long FIRESTORE_TIMEOUT_MS = 10000L;
 
     // DATABASE COLLECTION NAMES
     public static final String COLLECTION_USERS = "users";
@@ -37,7 +37,7 @@ public final class Constants {
     public static final String COLLECTION_REPORTS = "reports";
     public static final String COLLECTION_SETTINGS = "settings";
 
-    // GAME MODULE IDS
+    // GAME MODULE IDS (existing)
     public static final String MODULE_ABC_SONG = "module_abc_song";
     public static final String MODULE_123_SONG = "module_123_song";
     public static final String MODULE_FAMILY = "module_family";
@@ -45,6 +45,9 @@ public final class Constants {
     public static final String GAME_WORD_BUILDER = "game_word_builder";
     public static final String GAME_MATCH_LETTER = "game_match_letter";
     public static final String GAME_MEMORY_MATCH = "game_memory_match";
+
+    // NEW MODULE ID
+    public static final String GAME_SHAPES_MATCH = "game_shapes_match";
 
     // MODULE TYPES
     public static final String TYPE_SONG = "song";
@@ -117,7 +120,7 @@ public final class Constants {
     public static final int MAX_CHILDREN_PER_PARENT = 5;
     public static final int MAX_CUSTOM_WORDS = 4;
     public static final int MAX_FAMILY_PHOTOS = 10;
-    public static final long MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+    public static final long MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
     public static final int MAX_SESSION_TIME_MINUTES = 30;
     public static final int DAILY_SESSION_LIMIT = 5;
 
@@ -129,7 +132,7 @@ public final class Constants {
     public static final int MASTERY_SESSIONS_REQUIRED = 5;
     public static final double MASTERY_SCORE_THRESHOLD = 85.0;
 
-    // TIME CONSTANTS (in milliseconds)
+    // TIME CONSTANTS
     public static final long ONE_SECOND_MS = 1000L;
     public static final long ONE_MINUTE_MS = 60 * ONE_SECOND_MS;
     public static final long ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
@@ -191,7 +194,6 @@ public final class Constants {
     public static final String REMOTE_FEATURE_FLAG_FAMILY_MODULE = "feature_family_module";
     public static final String REMOTE_FEATURE_FLAG_ADVANCED_ANALYTICS = "feature_advanced_analytics";
 
-
     // REMOTE CONFIG DEFAULTS
     public static Map<String, Object> getRemoteConfigDefaults() {
         Map<String, Object> defaults = new HashMap<>();
@@ -204,27 +206,35 @@ public final class Constants {
         return defaults;
     }
 
-    // HELPER METHODS
-
     // Return all BrightBuds module IDs
     public static String[] getAllGameModuleIds() {
         return new String[]{
                 MODULE_ABC_SONG, MODULE_123_SONG, MODULE_FAMILY,
                 GAME_FEED_MONSTER, GAME_WORD_BUILDER,
-                GAME_MATCH_LETTER, GAME_MEMORY_MATCH
+                GAME_MATCH_LETTER, GAME_MEMORY_MATCH,
+                GAME_SHAPES_MATCH
         };
     }
 
-    //Get module display name by ID
+    // Display name resolver that accepts legacy ids and new ids
     public static String getModuleDisplayName(String moduleId) {
+        if (moduleId == null) return "Unknown Module";
         switch (moduleId) {
-            case MODULE_ABC_SONG: return "ABC Song";
-            case MODULE_123_SONG: return "123 Song";
-            case MODULE_FAMILY: return "Family Photos";
+            // New ids
             case GAME_FEED_MONSTER: return "Feed the Monster";
             case GAME_WORD_BUILDER: return "Word Builder";
             case GAME_MATCH_LETTER: return "Match the Letter";
             case GAME_MEMORY_MATCH: return "Memory Match";
+            case MODULE_ABC_SONG: return "ABC Song";
+            case MODULE_123_SONG: return "123 Song";
+            case MODULE_FAMILY: return "Family Photos";
+            case GAME_SHAPES_MATCH: return "Shapes Match";
+            // Legacy ids used by some components
+            case "module_feed_the_monster": return "Feed the Monster";
+            case "module_match_the_letter": return "Match the Letter";
+            case "module_memory_match": return "Memory Match";
+            case "module_word_builder": return "Word Builder";
+            case "module_my_family": return "My Family Album";
             default: return "Unknown Module";
         }
     }
@@ -239,13 +249,12 @@ public final class Constants {
 
     // Determine color associated with a given score
     public static String getPerformanceColor(double score) {
-        if (score >= EXCELLENT_SCORE_THRESHOLD) return "#4CAF50"; // Green
-        else if (score >= GOOD_SCORE_THRESHOLD) return "#8BC34A"; // Light Green
-        else if (score >= PASSING_SCORE_THRESHOLD) return "#FFC107"; // Amber
-        else return "#F44336"; // Red
+        if (score >= EXCELLENT_SCORE_THRESHOLD) return "#4CAF50";
+        else if (score >= GOOD_SCORE_THRESHOLD) return "#8BC34A";
+        else if (score >= PASSING_SCORE_THRESHOLD) return "#FFC107";
+        else return "#F44336";
     }
 
-    // Format duration (ms → mm:ss)
     public static String formatTime(long milliseconds) {
         long seconds = milliseconds / 1000;
         long minutes = seconds / 60;
@@ -255,7 +264,6 @@ public final class Constants {
                 : String.format(Locale.getDefault(), "%ds", seconds);
     }
 
-    // Format file size for display
     public static String formatFileSize(long bytes) {
         if (bytes < 1024) return bytes + " B";
         else if (bytes < 1024 * 1024)
@@ -264,17 +272,14 @@ public final class Constants {
             return String.format(Locale.getDefault(), "%.1f MB", bytes / (1024.0 * 1024.0));
     }
 
-    // Check if score achieves mastery
     public static boolean isMasteryScore(double score, int sessionsCompleted) {
         return score >= MASTERY_SCORE_THRESHOLD && sessionsCompleted >= MASTERY_SESSIONS_REQUIRED;
     }
 
-    // Validate email format
     public static boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
     }
 
-    // Validate name format
     public static boolean isValidName(String name) {
         return name != null && name.matches("^[a-zA-Z\\s]{2,50}$");
     }

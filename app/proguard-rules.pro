@@ -1,21 +1,53 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ===============================================================
+# BrightBuds Project - ProGuard Configuration
+# ===============================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Preserve Konfetti animation library classes (used for in-game effects)
+-keep class nl.dionsegijn.konfetti.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve Firebase Firestore model classes (loaded via reflection)
+-keep class com.example.brightbuds_app.models.** { *; }
+-keepclassmembers class * {
+    @com.google.firebase.firestore.PropertyName <fields>;
+    @com.google.firebase.firestore.PropertyName <methods>;
+}
+-keepattributes *Annotation*
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Preserve all Fragment subclasses (required for FragmentManager)
+-keep class com.example.brightbuds_app.ui.** { *; }
+
+# Preserve Android Parcelable classes (needed for data transfer)
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator CREATOR;
+}
+
+# Preserve classes with @Keep annotation (used by Firebase and Play Services)
+-keep @androidx.annotation.Keep class * { *; }
+
+# Preserve Firebase Authentication and Firestore runtime
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-dontnote com.google.firebase.**
+
+# Preserve Google Play services libraries
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# Preserve AndroidX classes (support libraries)
+-keep class androidx.** { *; }
+-dontwarn androidx.**
+
+# Preserve TextToSpeech and MediaPlayer for in-game audio and narration
+-keep class android.speech.tts.** { *; }
+-keep class android.media.MediaPlayer { *; }
+
+#  retain logging for debugging crashes
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+    public static *** i(...);
+}
+
+# ===============================================================
+# End of ProGuard Rules
+# ===============================================================

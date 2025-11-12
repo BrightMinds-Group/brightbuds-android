@@ -10,12 +10,8 @@ import java.util.Map;
 
 /**
  * ConfigManager
- * Handles all configuration logic by combining:
- *  🔹 Firebase Remote Config (cloud-managed dynamic settings)
- *  🔹 SecurePreferences (encrypted local storage & offline fallback)
- *
- * Ensures BrightBuds always has valid configuration data,
- * even when offline or Firebase fetch fails.
+ * Handles configuration by combining Firebase Remote Config and SecurePreferences.
+ * Provides cloud values with local encrypted fallback.
  */
 public class ConfigManager {
 
@@ -35,17 +31,11 @@ public class ConfigManager {
         initializeRemoteConfig();
     }
 
-    /**
-     * Singleton instance
-     */
     public static synchronized ConfigManager getInstance(Context context) {
         if (instance == null) instance = new ConfigManager(context);
         return instance;
     }
 
-    // =========================================================
-    // 🔹 Initialization
-    // =========================================================
     private void initializeRemoteConfig() {
         try {
             FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -67,12 +57,6 @@ public class ConfigManager {
         return isInitialized;
     }
 
-    // =========================================================
-    // 🔹 Fetch & Sync Methods
-    // =========================================================
-    /**
-     * Fetch the latest Remote Config values from Firebase
-     */
     public void fetchAndActivate(FetchCallback callback) {
         if (!isInitialized) {
             callback.onFailure(new IllegalStateException("ConfigManager not initialized"));
@@ -81,42 +65,37 @@ public class ConfigManager {
 
         remoteConfig.fetchAndActivate().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Log.i(TAG, "✅ Remote Config fetched and activated");
-                persistRemoteConfigValues(); // Save to local encrypted storage
+                Log.i(TAG, "Remote Config fetched and activated");
+                persistRemoteConfigValues();
                 callback.onSuccess(true);
             } else {
-                Log.w(TAG, "⚠️ Remote Config fetch failed — using local cache");
+                Log.w(TAG, "Remote Config fetch failed. Using local cache");
                 callback.onFailure(task.getException());
             }
         });
     }
 
-    /**
-     * Persist all current Remote Config values to SecurePreferences
-     */
+    // Correct persistence using types from defaults map
     private void persistRemoteConfigValues() {
         try {
-            Map<String, Object> allKeys = Constants.getRemoteConfigDefaults();
-
-            for (String key : allKeys.keySet()) {
-                Object value = remoteConfig.getValue(key).getClass();
-                if (value instanceof Boolean)
-                    securePrefs.putBoolean(key, (Boolean) value);
-                else if (value instanceof Number)
-                    securePrefs.putLong(key, ((Number) value).longValue());
-                else
-                    securePrefs.putString(key, value.toString());
+            Map<String, Object> defaults = Constants.getRemoteConfigDefaults();
+            for (String key : defaults.keySet()) {
+                Object def = defaults.get(key);
+                if (def instanceof Boolean) {
+                    securePrefs.putBoolean(key, remoteConfig.getBoolean(key));
+                } else if (def instanceof Number) {
+                    long val = (long) remoteConfig.getDouble(key);
+                    securePrefs.putLong(key, val);
+                } else {
+                    securePrefs.putString(key, remoteConfig.getString(key));
+                }
             }
-
             Log.d(TAG, "Remote Config values persisted locally");
         } catch (Exception e) {
             Log.e(TAG, "Error persisting Remote Config values", e);
         }
     }
 
-    // =========================================================
-    // 🔹 Getters with Cloud + Local Fallback
-    // =========================================================
     public boolean getBoolean(String key, boolean defaultValue) {
         try {
             return remoteConfig.getBoolean(key);
@@ -154,9 +133,6 @@ public class ConfigManager {
         }
     }
 
-    // =========================================================
-    // 🔹 Common Config Accessors (app-level)
-    // =========================================================
     public boolean isAutoReportEnabled() {
         return getBoolean(Constants.REMOTE_AUTO_REPORT_ENABLED, Constants.AUTO_GENERATE_REPORTS);
     }
@@ -166,7 +142,7 @@ public class ConfigManager {
     }
 
     public int getWeeklyReportDay() {
-        return (int) getLong(Constants.REMOTE_WEEKLY_REPORT_DAY, 0); // 0 = Sunday
+        return (int) getLong(Constants.REMOTE_WEEKLY_REPORT_DAY, 0);
     }
 
     public int getSessionTimeLimit() {
@@ -181,9 +157,6 @@ public class ConfigManager {
         return getBoolean(Constants.REMOTE_FEATURE_FLAG_ADVANCED_ANALYTICS, false);
     }
 
-    // =========================================================
-    // 🔹 Local Preference Overrides
-    // =========================================================
     public void setAutoSyncEnabled(boolean enabled) {
         securePrefs.putBoolean(Constants.PREF_AUTO_SYNC_ENABLED, enabled);
     }
@@ -208,17 +181,11 @@ public class ConfigManager {
         return securePrefs.getLong(Constants.PREF_LAST_SYNC_TIME, 0L);
     }
 
-    // =========================================================
-    // 🔹 Maintenance
-    // =========================================================
     public void clearLocalCache() {
         securePrefs.clearAll();
         Log.i(TAG, "Local Config cache cleared");
     }
 
-    // =========================================================
-    // 🔹 Callback Interface
-    // =========================================================
     public interface FetchCallback {
         void onSuccess(boolean updated);
         void onFailure(Exception e);

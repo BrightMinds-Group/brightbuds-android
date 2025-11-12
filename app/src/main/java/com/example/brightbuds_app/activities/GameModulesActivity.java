@@ -22,6 +22,8 @@ import java.util.List;
 /**
  * Shows all learning modules for the selected child and launches
  * the correct Activity per module. Uses Firestore document ID to decide navigation.
+ * Sends the metrics to Firebase for each game module only when
+ * connected to WiFi
  */
 public class GameModulesActivity extends AppCompatActivity {
 

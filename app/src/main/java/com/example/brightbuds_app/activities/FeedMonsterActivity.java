@@ -4,9 +4,10 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.brightbuds_app.R;
 
-/**
- * Placeholder for Feed the Monster game.
- */
+/*
+ Hosts the FeedTheMonsterFragment inside a FragmentContainerView.
+ Activity contains no game logic to keep responsibilities separate.
+*/
 public class FeedMonsterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
