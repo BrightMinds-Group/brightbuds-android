@@ -3,19 +3,20 @@ package com.example.brightbuds_app.ui.games;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,30 +27,33 @@ import com.example.brightbuds_app.interfaces.DataCallbacks;
 import com.example.brightbuds_app.services.ProgressService;
 import com.example.brightbuds_app.utils.Constants;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * FeedTheMonsterFragment
  *
- * Educational mini-game where the child matches the target number of cookies.
- * Tracks performance metrics and stores results locally and on Firebase.
+ * Educational mini game where the child drags cookies into the monster mouth
+ * to match the displayed target number.
  */
 public class FeedTheMonsterFragment extends Fragment {
 
     // UI elements
-    private ImageView bgImage, imgMonster, imgStar;
-    private TextView tvScore, tvRound, tvTarget, tvStats;
-    private GridLayout gridCookies;
-    private Button btnReset, btnNext;
-    private ImageButton btnHomeIcon, btnCloseIcon;
+    private ImageView bgImage;
+    private ImageView imgMonster;
+    private ImageView imgStar;
+    private ImageView imgTargetNumber;
+    private TextView tvScore;
+    private TextView tvRound;
+    private TextView tvTarget;
+    private TextView tvStats;
     private ProgressBar progressRound;
+    private FrameLayout playArea;
+    private ImageButton btnHomeIcon;
+    private ImageButton btnCloseIcon;
 
     // Game state
     private final Random rng = new Random();
-    private final Set<View> selectedCookies = new HashSet<>();
     private int score = 0;
     private int round = 1;
     private int targetNumber = 5;
@@ -57,22 +61,24 @@ public class FeedTheMonsterFragment extends Fragment {
     private int totalIncorrect = 0;
     private int wrongStreak = 0;
     private int stars = 0;
+    private int cookiesFedThisRound = 0;
+    private boolean roundLocked = false;
 
     // Session tracking
     private long sessionStartMs = 0L;
     private int sessionRounds = 0;
     private int timesPlayed;
 
-    // Shared Preferences keys
+    // Shared preferences keys
     private static final String PREFS = "brightbuds_game_prefs";
     private static final String KEY_TIMES_PLAYED = "feed_monster_times_played";
 
-    // Services and Audio
+    // Services and audio
     private ProgressService progressService;
     private MediaPlayer bgMusic;
     private TextToSpeech tts;
 
-    // Selected child reference
+    // Child selection
     private String selectedChildId;
 
     @Nullable
@@ -91,37 +97,21 @@ public class FeedTheMonsterFragment extends Fragment {
         bgImage = v.findViewById(R.id.bgImage);
         imgMonster = v.findViewById(R.id.imgMonster);
         imgStar = v.findViewById(R.id.imgStar);
+        imgTargetNumber = v.findViewById(R.id.imgTargetNumber);
         tvScore = v.findViewById(R.id.tvScore);
         tvRound = v.findViewById(R.id.tvRound);
         tvTarget = v.findViewById(R.id.tvTarget);
         tvStats = v.findViewById(R.id.tvStats);
-        gridCookies = v.findViewById(R.id.gridCookies);
-        btnReset = v.findViewById(R.id.btnReset);
-        btnNext = v.findViewById(R.id.btnNext);
+        progressRound = v.findViewById(R.id.progressRound);
+        playArea = v.findViewById(R.id.playArea);
         btnHomeIcon = v.findViewById(R.id.btnHomeIcon);
         btnCloseIcon = v.findViewById(R.id.btnCloseIcon);
-        progressRound = v.findViewById(R.id.progressRound);
 
-        // Initialize ProgressService and get child reference
+        // Initialise services and child reference
         progressService = new ProgressService(requireContext());
-        SharedPreferences parentPrefs = requireContext().getSharedPreferences("BrightBudsPrefs", Context.MODE_PRIVATE);
+        SharedPreferences parentPrefs =
+                requireContext().getSharedPreferences("BrightBudsPrefs", Context.MODE_PRIVATE);
         selectedChildId = parentPrefs.getString("selectedChildId", null);
-
-        // Create cookies dynamically
-        createCookieButtons(10);
-
-        // Button actions
-        btnReset.setOnClickListener(view -> resetSelection());
-        btnNext.setOnClickListener(view -> checkAndAdvance());
-
-        // Close and Home navigation
-        View.OnClickListener endGame = vv -> {
-            saveSessionMetricsSafely();
-            stopAudioTts();
-            requireActivity().finish();
-        };
-        btnHomeIcon.setOnClickListener(endGame);
-        btnCloseIcon.setOnClickListener(endGame);
 
         // Background music setup
         bgMusic = MediaPlayer.create(requireContext(), R.raw.monster_music);
@@ -131,7 +121,7 @@ public class FeedTheMonsterFragment extends Fragment {
             bgMusic.start();
         }
 
-        // Text-to-Speech setup
+        // Text to speech setup
         tts = new TextToSpeech(requireContext(), status -> {
             if (status == TextToSpeech.SUCCESS) {
                 tts.setLanguage(Locale.ENGLISH);
@@ -145,104 +135,245 @@ public class FeedTheMonsterFragment extends Fragment {
         timesPlayed = sp.getInt(KEY_TIMES_PLAYED, 0) + 1;
         sp.edit().putInt(KEY_TIMES_PLAYED, timesPlayed).apply();
 
-        // Start gameplay
+        // Home and Close both just finish this screen
+        View.OnClickListener endGame = view1 -> {
+            saveSessionMetricsSafely();
+            stopAudioTts();
+            requireActivity().finish();
+        };
+        btnHomeIcon.setOnClickListener(endGame);
+        btnCloseIcon.setOnClickListener(endGame);
+
+        // Start session and first round
         sessionStartMs = System.currentTimeMillis();
         startRound(true);
-        startBackgroundPan();
     }
 
-    /** Creates cookie buttons dynamically for gameplay. */
-    private void createCookieButtons(int totalCookies) {
-        int sizePx = dp(64), padPx = dp(8);
-        for (int i = 0; i < totalCookies; i++) {
-            ImageButton cookie = new ImageButton(requireContext());
-            cookie.setBackground(null);
-            cookie.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            cookie.setPadding(padPx, padPx, padPx, padPx);
-            cookie.setImageResource(R.drawable.cookie);
-            cookie.setFocusable(true);
-            cookie.setContentDescription("Cookie");
+    // region Game setup and rounds
 
-            GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
-            lp.width = sizePx;
-            lp.height = sizePx;
-            lp.setMargins(padPx, padPx, padPx, padPx);
-            cookie.setLayoutParams(lp);
-
-            cookie.setOnClickListener(this::onCookieTapped);
-            gridCookies.addView(cookie);
-        }
-    }
-
-    /** Handles cookie selection logic. */
-    private void onCookieTapped(View cookie) {
-        if (selectedCookies.contains(cookie)) {
-            selectedCookies.remove(cookie);
-            animateScale(cookie, 1.0f);
-            cookie.setAlpha(1.0f);
-        } else {
-            selectedCookies.add(cookie);
-            animateScale(cookie, 1.15f);
-            cookie.setAlpha(0.85f);
-            speak(String.valueOf(selectedCookies.size()));
-        }
-        progressRound.setMax(targetNumber);
-        progressRound.setProgress(Math.min(selectedCookies.size(), targetNumber));
-    }
-
-    /** Starts a new round and resets game state. */
-    private void startRound(boolean first) {
-        targetNumber = 1 + rng.nextInt(10);
-        selectedCookies.clear();
+    private void startRound(boolean firstRound) {
+        roundLocked = false;
+        cookiesFedThisRound = 0;
         wrongStreak = 0;
 
-        for (int i = 0; i < gridCookies.getChildCount(); i++) {
-            View child = gridCookies.getChildAt(i);
-            child.setAlpha(1f);
-            animateScale(child, 1.0f);
-        }
+        // Target number between 1 and 10
+        targetNumber = 1 + rng.nextInt(10);
 
         imgMonster.setImageResource(R.drawable.monster_neutral);
-        tvTarget.setText("Feed me: " + targetNumber);
+        tvTarget.setText("Feed me");
         tvRound.setText("Round: " + round);
         tvScore.setText("Score: " + score);
         updateStats();
 
         progressRound.setMax(targetNumber);
         progressRound.setProgress(0);
+
+        updateTargetNumberImage(targetNumber);
+
+        playArea.removeAllViews();
+        // ten cookies each round
+        createCookiesForRound(10);
+
         speak("Feed me " + targetNumber + " cookies");
         pulse(tvTarget);
     }
 
-    /** Checks user answer and updates metrics. */
-    private void checkAndAdvance() {
-        int selected = selectedCookies.size();
-        boolean correct = selected == targetNumber;
-
-        if (correct) {
-            totalCorrect++;
-            wrongStreak = 0;
-            score += 10;
-            stars++;
-            imgMonster.setImageResource(R.drawable.monster_happy);
-            showStarFlash();
-            wiggle(imgMonster);
-            speak("Yay!");
-        } else {
-            totalIncorrect++;
-            wrongStreak++;
-            imgMonster.setImageResource(R.drawable.monster_sad);
-            shake(imgMonster);
-            speak("Try again!");
+    private void updateTargetNumberImage(int number) {
+        int resId;
+        switch (number) {
+            case 1:  resId = R.drawable.number_1;  break;
+            case 2:  resId = R.drawable.number_2;  break;
+            case 3:  resId = R.drawable.number_3;  break;
+            case 4:  resId = R.drawable.number_4;  break;
+            case 5:  resId = R.drawable.number_5;  break;
+            case 6:  resId = R.drawable.number_6;  break;
+            case 7:  resId = R.drawable.number_7;  break;
+            case 8:  resId = R.drawable.number_8;  break;
+            case 9:  resId = R.drawable.number_9;  break;
+            case 10: resId = R.drawable.number_10; break;
+            default: resId = 0;                     break;
         }
 
+        if (resId != 0) {
+            imgTargetNumber.setVisibility(View.VISIBLE);
+            imgTargetNumber.setImageResource(resId);
+        } else {
+            imgTargetNumber.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void createCookiesForRound(int cookieCount) {
+        playArea.post(() -> {
+            int width = playArea.getWidth();
+            int height = playArea.getHeight();
+
+            if (width <= 0 || height <= 0) return;
+
+            int size = dp(110); // cookie size
+            int margin = dp(6);
+
+            for (int i = 0; i < cookieCount; i++) {
+                ImageView cookie = new ImageView(requireContext());
+                cookie.setImageResource(R.drawable.cookie);
+                cookie.setContentDescription("Cookie");
+                cookie.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+                FrameLayout.LayoutParams lp =
+                        new FrameLayout.LayoutParams(size, size);
+                cookie.setLayoutParams(lp);
+
+                // Let cookies START on the right half of the screen
+                int totalMaxX = width - size - margin;
+                int halfWidth = width / 2;
+                int minX = halfWidth;
+                int maxX = totalMaxX;
+
+                float startX = minX + rng.nextFloat() * Math.max(1, (maxX - minX));
+                float startY = margin + rng.nextFloat() * Math.max(1, (height - size - margin));
+
+                cookie.setX(startX);
+                cookie.setY(startY);
+
+                cookie.setOnTouchListener(cookieDragListener);
+                playArea.addView(cookie);
+            }
+        });
+    }
+
+
+
+    // endregion
+
+    // region Drag and drop logic
+
+    private final View.OnTouchListener cookieDragListener = new View.OnTouchListener() {
+
+        float dX;
+        float dY;
+        final int[] playAreaLocation = new int[2];
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            if (roundLocked) {
+                return false;
+            }
+
+            playArea.getLocationOnScreen(playAreaLocation);
+
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN: {
+                    float touchX = event.getRawX() - playAreaLocation[0];
+                    float touchY = event.getRawY() - playAreaLocation[1];
+                    dX = view.getX() - touchX;
+                    dY = view.getY() - touchY;
+                    return true;
+                }
+                case MotionEvent.ACTION_MOVE: {
+                    float newX = event.getRawX() - playAreaLocation[0] + dX;
+                    float newY = event.getRawY() - playAreaLocation[1] + dY;
+
+                    float maxX = playArea.getWidth() - view.getWidth();
+                    float maxY = playArea.getHeight() - view.getHeight();
+                    newX = Math.max(0, Math.min(newX, maxX));
+                    newY = Math.max(0, Math.min(newY, maxY));
+
+                    view.setX(newX);
+                    view.setY(newY);
+                    return true;
+                }
+                case MotionEvent.ACTION_UP: {
+                    handleCookieDrop(view);
+                    return true;
+                }
+                default:
+                    return false;
+            }
+        }
+    };
+
+    private void handleCookieDrop(View cookieView) {
+        if (roundLocked) {
+            return;
+        }
+
+        Rect monsterRect = new Rect();
+        Rect cookieRect = new Rect();
+
+        imgMonster.getGlobalVisibleRect(monsterRect);
+        cookieView.getGlobalVisibleRect(cookieRect);
+
+        boolean hitMonster = Rect.intersects(monsterRect, cookieRect);
+
+        if (hitMonster) {
+            handleCookieFed(cookieView);
+        } else {
+            handleMiss();
+        }
+    }
+
+    private void handleCookieFed(View cookieView) {
+        cookieView.setVisibility(View.INVISIBLE);
+        cookiesFedThisRound++;
+
+        progressRound.setProgress(Math.min(cookiesFedThisRound, targetNumber));
+        speak(String.valueOf(cookiesFedThisRound));
+
+        if (cookiesFedThisRound == targetNumber) {
+            handleCorrectAnswer();
+        }
+    }
+
+    private void handleMiss() {
+        totalIncorrect++;
+        wrongStreak++;
+        imgMonster.setImageResource(R.drawable.monster_sad);
+        shake(imgMonster);
+        speak("Try again");
         saveSessionMetricsIncremental();
+        updateStats();
+
+        if (wrongStreak >= 5 && !roundLocked) {
+            roundLocked = true;
+            imgMonster.postDelayed(this::advanceRound, 800);
+        }
+    }
+
+    private void handleCorrectAnswer() {
+        roundLocked = true;
+        totalCorrect++;
+        wrongStreak = 0;
+        score += 10;
+        stars++;
+
+        imgMonster.setImageResource(R.drawable.monster_happy);
+        showStarFlash();
+        wiggle(imgMonster);
+        speak("Yay");
+        saveSessionMetricsIncremental();
+        updateStats();
+
+        imgMonster.postDelayed(this::advanceRound, 900);
+    }
+
+    private void advanceRound() {
         round++;
         sessionRounds++;
         startRound(false);
     }
 
-    /** Displays a brief star flash animation for positive feedback. */
+    // endregion
+
+    // region Visual feedback and animations
+
+    private void updateStats() {
+        tvStats.setText(
+                "Correct: " + totalCorrect
+                        + "  Incorrect: " + totalIncorrect
+                        + "  Played: " + timesPlayed
+                        + "  Stars: " + stars
+        );
+    }
+
     private void showStarFlash() {
         imgStar.setVisibility(View.VISIBLE);
         animateScale(imgStar, 1.4f);
@@ -251,85 +382,6 @@ public class FeedTheMonsterFragment extends Fragment {
             imgStar.setVisibility(View.GONE);
         }, 600);
     }
-
-    /** Updates player performance statistics on screen. */
-    private void updateStats() {
-        tvStats.setText("Correct: " + totalCorrect
-                + "  Incorrect: " + totalIncorrect
-                + "  Played: " + timesPlayed
-                + "  Stars: " + stars);
-    }
-
-    /** Animates background panning for dynamic feel. */
-    private void startBackgroundPan() {
-        bgImage.post(() -> {
-            float shift = dp(32);
-            ObjectAnimator left = ObjectAnimator.ofFloat(bgImage, View.TRANSLATION_X, -shift);
-            left.setDuration(8000);
-            left.setRepeatMode(ObjectAnimator.REVERSE);
-            left.setRepeatCount(ObjectAnimator.INFINITE);
-            left.start();
-        });
-    }
-
-    /** Handles voice output for game prompts. */
-    private void speak(String text) {
-        if (tts == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "feed_monster_tts");
-        } else {
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-        }
-    }
-
-    // ---------- Data persistence ----------
-
-    private void saveSessionMetricsIncremental() {
-        if (selectedChildId == null) return;
-        long now = System.currentTimeMillis();
-        long timeSpent = Math.max(0L, now - sessionStartMs);
-        int plays = Math.max(1, timesPlayed);
-
-        progressService.recordGameSession(
-                selectedChildId,
-                Constants.GAME_FEED_MONSTER,
-                score,
-                timeSpent,
-                stars,
-                totalCorrect,
-                totalIncorrect,
-                plays,
-                new DataCallbacks.GenericCallback() {
-                    @Override public void onSuccess(String result) { }
-                    @Override public void onFailure(Exception e) { }
-                }
-        );
-        updateStats();
-    }
-
-    private void saveSessionMetricsSafely() {
-        if (selectedChildId == null) return;
-        long now = System.currentTimeMillis();
-        long timeSpent = Math.max(0L, now - sessionStartMs);
-        int plays = Math.max(1, timesPlayed);
-
-        progressService.recordGameSession(
-                selectedChildId,
-                Constants.GAME_FEED_MONSTER,
-                score,
-                timeSpent,
-                stars,
-                totalCorrect,
-                totalIncorrect,
-                plays,
-                new DataCallbacks.GenericCallback() {
-                    @Override public void onSuccess(String result) { }
-                    @Override public void onFailure(Exception e) { }
-                }
-        );
-    }
-
-    // ---------- Animations ----------
 
     private void animateScale(View v, float toScale) {
         ObjectAnimator sx = ObjectAnimator.ofFloat(v, View.SCALE_X, toScale);
@@ -347,6 +399,7 @@ public class FeedTheMonsterFragment extends Fragment {
         upY.setDuration(160);
         upX.start();
         upY.start();
+
         v.postDelayed(() -> {
             ObjectAnimator downX = ObjectAnimator.ofFloat(v, View.SCALE_X, 1.1f, 1f);
             ObjectAnimator downY = ObjectAnimator.ofFloat(v, View.SCALE_Y, 1.1f, 1f);
@@ -381,19 +434,120 @@ public class FeedTheMonsterFragment extends Fragment {
         v.postDelayed(r3::start, 160);
     }
 
-    // ---------- Lifecycle ----------
+    // endregion
+
+    // region Persistence
+
+    private void saveSessionMetricsIncremental() {
+        if (selectedChildId == null) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long timeSpent = Math.max(0L, now - sessionStartMs);
+        int plays = Math.max(1, timesPlayed);
+
+        progressService.recordGameSession(
+                selectedChildId,
+                Constants.GAME_FEED_MONSTER,
+                score,
+                timeSpent,
+                stars,
+                totalCorrect,
+                totalIncorrect,
+                plays,
+                new DataCallbacks.GenericCallback() {
+                    @Override
+                    public void onSuccess(String result) { }
+
+                    @Override
+                    public void onFailure(Exception e) { }
+                }
+        );
+    }
+
+    private void saveSessionMetricsSafely() {
+        if (selectedChildId == null) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long timeSpent = Math.max(0L, now - sessionStartMs);
+        int plays = Math.max(1, timesPlayed);
+
+        progressService.recordGameSession(
+                selectedChildId,
+                Constants.GAME_FEED_MONSTER,
+                score,
+                timeSpent,
+                stars,
+                totalCorrect,
+                totalIncorrect,
+                plays,
+                new DataCallbacks.GenericCallback() {
+                    @Override
+                    public void onSuccess(String result) { }
+
+                    @Override
+                    public void onFailure(Exception e) { }
+                }
+        );
+    }
+
+    // endregion
+
+    // region Utilities and lifecycle
+
+    private void speak(String text) {
+        if (tts == null) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "feed_monster_tts");
+        } else {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        }
+    }
+
+    private int dp(int value) {
+        float scale = getResources().getDisplayMetrics().density;
+        return (int) (value * scale + 0.5f);
+    }
+
+    private void stopAudioTts() {
+        if (bgMusic != null) {
+            try {
+                if (bgMusic.isPlaying()) {
+                    bgMusic.stop();
+                }
+            } catch (Exception ignored) { }
+            bgMusic.release();
+            bgMusic = null;
+        }
+        if (tts != null) {
+            try {
+                tts.stop();
+            } catch (Exception ignored) { }
+            tts.shutdown();
+            tts = null;
+        }
+    }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (bgMusic != null && bgMusic.isPlaying()) bgMusic.pause();
+        if (bgMusic != null && bgMusic.isPlaying()) {
+            bgMusic.pause();
+        }
         saveSessionMetricsSafely();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (bgMusic != null) bgMusic.start();
+        if (bgMusic != null) {
+            bgMusic.start();
+        }
     }
 
     @Override
@@ -403,35 +557,5 @@ public class FeedTheMonsterFragment extends Fragment {
         stopAudioTts();
     }
 
-    // ---------- Utilities ----------
-
-    private int dp(int value) {
-        float scale = getResources().getDisplayMetrics().density;
-        return (int) (value * scale + 0.5f);
-    }
-
-    private void stopAudioTts() {
-        if (bgMusic != null) {
-            try { if (bgMusic.isPlaying()) bgMusic.stop(); } catch (Exception ignored) { }
-            bgMusic.release();
-            bgMusic = null;
-        }
-        if (tts != null) {
-            try { tts.stop(); } catch (Exception ignored) { }
-            tts.shutdown();
-            tts = null;
-        }
-    }
-
-    /** Clears selected cookies and resets round progress. */
-    private void resetSelection() {
-        selectedCookies.clear();
-        for (int i = 0; i < gridCookies.getChildCount(); i++) {
-            View child = gridCookies.getChildAt(i);
-            child.setAlpha(1f);
-            animateScale(child, 1.0f);
-        }
-        progressRound.setProgress(0);
-        speak("Reset");
-    }
+    // endregion
 }

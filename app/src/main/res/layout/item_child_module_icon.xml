@@ -3,21 +3,22 @@
     android:layout_width="165dp"
     android:layout_height="165dp"
     android:layout_margin="12dp"
-    android:background="@drawable/bg_child_tile"
-    android:elevation="8dp">
+    android:background="@android:color/transparent"
+    android:elevation="0dp"
+    android:foreground="@drawable/tile_press_effect">
 
     <!-- Module Icon -->
     <ImageView
         android:id="@+id/imgModuleIcon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
+        android:clipToOutline="true"
+        android:background="@drawable/rounded_image_mask"
         android:contentDescription="Module icon" />
 
-
-    <!-- Lock Overlay Icon (for locked modules) -->
+    <!-- Lock overlay for locked modules -->
     <ImageView
         android:id="@+id/imgLockIcon"
         android:layout_width="40dp"
@@ -26,4 +27,5 @@
         android:src="@drawable/ic_lock"
         android:visibility="gone"
         android:contentDescription="@string/locked_icon" />
+
 </FrameLayout>

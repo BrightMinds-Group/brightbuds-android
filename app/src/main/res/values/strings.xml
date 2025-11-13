@@ -27,6 +27,17 @@
     <string name="add_child">Add Child</string>
     <string name="generate_reports">Generate Reports</string>
 
+    <!--Feed Monster Game -->
+    <string name="target_number">Target number</string>
+    <string name="monster_image">Monster</string>
+    <string name="home">Home</string>
+    <string name="close">Close</string>
+
+
+
+
+
+
     <!-- Child Profile -->
     <string name="save_child_button_text">Save Child Profile</string>
     <string name="saving_button_text">Saving...</string>

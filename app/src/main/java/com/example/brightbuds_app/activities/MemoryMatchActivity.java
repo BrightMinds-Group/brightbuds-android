@@ -1,25 +1,28 @@
 package com.example.brightbuds_app.activities;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.brightbuds_app.R;
+import com.example.brightbuds_app.ui.games.MemoryMatchFragment;
 
 public class MemoryMatchActivity extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simple_placeholder);
 
-        TextView title = findViewById(R.id.title);
-        String moduleTitle = getIntent().getStringExtra("moduleTitle");
-        if (moduleTitle != null) {
-            title.setText(moduleTitle + " - Game");
-        } else {
-            title.setText("Memory Match Game");
+        // Load the activity layout that contains the fragment container
+        setContentView(R.layout.activity_memory_match);
+
+        // Load MemoryMatchFragment when activity starts
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.memoryMatchFragmentContainer, new MemoryMatchFragment())
+                    .commit();
         }
     }
 }

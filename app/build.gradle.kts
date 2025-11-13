@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.android")      // you can keep this even if you have only Java
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 }
@@ -29,12 +29,11 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = true
-            // Use this version for Kotlin DSL (Gradle 8+)
+
             buildFeatures {
                 buildConfig = true
             }
-            // Enable resource shrinking after minify
-            // Add this safely with Kotlin DSL syntax
+
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -78,7 +77,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
 
-    // Image Loading & Charts
+    // Image Loading and Charts
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")

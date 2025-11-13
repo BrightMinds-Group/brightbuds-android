@@ -64,4 +64,10 @@
     <color name="chart_orange">#FF9800</color>
     <color name="chart_purple">#9C27B0</color>
 
+    <!-- Chart Colors -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+
+
 </resources>

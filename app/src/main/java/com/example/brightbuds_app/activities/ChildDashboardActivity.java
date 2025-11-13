@@ -38,11 +38,21 @@ public class ChildDashboardActivity extends AppCompatActivity {
 
         moduleGrid = findViewById(R.id.moduleGrid);
 
-        // Retrieve childId safely
+        // 1. Try get childId from Intent
         childId = getIntent().getStringExtra("childId");
+
+        // 2. If missing, fall back to stored selection
         if (childId == null || childId.isEmpty()) {
-            Log.w(TAG, "⚠️ No childId passed to ChildDashboardActivity");
-            Toast.makeText(this, "Child profile not found. Please reselect a child.", Toast.LENGTH_LONG).show();
+            var prefs = getSharedPreferences("BrightBudsPrefs", Context.MODE_PRIVATE);
+            childId = prefs.getString("selectedChildId", null);
+        }
+
+        // 3. Only if still missing, show the toast and exit
+        if (childId == null || childId.isEmpty()) {
+            Log.w(TAG, "No childId available for ChildDashboardActivity");
+            Toast.makeText(this,
+                    "Child profile not found. Please reselect a child.",
+                    Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -62,26 +72,26 @@ public class ChildDashboardActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Module> modules) {
                 if (modules == null || modules.isEmpty()) {
-                    Log.w(TAG, "⚠️ No modules returned from service");
+                    Log.w(TAG, "No modules returned from service");
                     Toast.makeText(ChildDashboardActivity.this,
                             "No modules available yet.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                Log.d(TAG, "✅ Modules loaded: " + modules.size());
+                Log.d(TAG, "Modules loaded: " + modules.size());
 
                 for (Module module : modules) {
                     if (module.isActive()) {
                         addModuleIcon(module);
                     } else {
-                        Log.d(TAG, "⏸ Skipped inactive module: " + module.getTitle());
+                        Log.d(TAG, "Skipped inactive module: " + module.getTitle());
                     }
                 }
             }
 
             @Override
             public void onError(Exception e) {
-                Log.e(TAG, "❌ Failed to load modules", e);
+                Log.e(TAG, "Failed to load modules", e);
                 Toast.makeText(ChildDashboardActivity.this,
                         "Failed to load modules: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
@@ -91,7 +101,9 @@ public class ChildDashboardActivity extends AppCompatActivity {
 
     /** Create and add a module tile to the grid */
     private void addModuleIcon(Module module) {
-        View tile = LayoutInflater.from(this).inflate(R.layout.item_child_module_icon, moduleGrid, false);
+        View tile = LayoutInflater.from(this)
+                .inflate(R.layout.item_child_module_icon, moduleGrid, false);
+
         ImageView icon = tile.findViewById(R.id.imgModuleIcon);
         ImageView lockIcon = tile.findViewById(R.id.imgLockIcon);
 
@@ -99,7 +111,6 @@ public class ChildDashboardActivity extends AppCompatActivity {
         if (title != null) {
             title.setText(module.getTitle() != null ? module.getTitle() : "Untitled Module");
         }
-
 
         // Check if module is locked
         boolean isLocked = isModuleLocked(module);
@@ -143,7 +154,8 @@ public class ChildDashboardActivity extends AppCompatActivity {
         if (module == null || module.getId() == null) return true;
 
         // Always unlocked modules
-        if (module.getId().equals("module_abc_song") || module.getId().equals("module_123_song")) {
+        if (module.getId().equals("module_abc_song") ||
+                module.getId().equals("module_123_song")) {
             return false;
         }
 
@@ -195,15 +207,14 @@ public class ChildDashboardActivity extends AppCompatActivity {
                 break;
 
             default:
-                // Fallback detection
                 if (title.contains("family") && !title.contains("words")) {
                     intent = new Intent(this, FamilyModuleActivity.class);
                 } else if (title.contains("monster")) {
                     intent = new Intent(this, FeedMonsterActivity.class);
                 } else if (title.contains("match") && title.contains("letter")) {
                     intent = new Intent(this, MatchLetterActivity.class);
-                } else if (title.contains("memory") ||
-                        (title.contains("match") && !title.contains("letter"))) {
+                } else if (title.contains("memory")
+                        || (title.contains("match") && !title.contains("letter"))) {
                     intent = new Intent(this, MemoryMatchActivity.class);
                 } else if (title.contains("word") || title.contains("builder")) {
                     intent = new Intent(this, WordBuilderActivity.class);
@@ -215,7 +226,8 @@ public class ChildDashboardActivity extends AppCompatActivity {
                     intent.putExtra("storagePath", module.getStoragePath());
                 } else {
                     intent = new Intent(this, ComingSoonActivity.class);
-                    intent.putExtra("message", module.getTitle() + " is coming soon!");
+                    intent.putExtra("message",
+                            module.getTitle() + " is coming soon!");
                 }
                 break;
         }

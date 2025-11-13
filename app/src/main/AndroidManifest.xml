@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -20,7 +21,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.BrightBudsApp">
 
-                <!-- Splash Screen -->
+                <!-- Splash Screen (Launcher) -->
                 <activity
                     android:name=".activities.SplashActivity"
                     android:exported="true"
@@ -88,25 +89,37 @@
                     android:label="My Profile"
                     android:parentActivityName=".activities.ParentDashboardActivity" />
 
-                <!-- Terms & Conditions -->
+                <!-- Terms and Conditions -->
                 <activity
                     android:name=".activities.TermsConditionsActivity"
-                    android:label="Terms &amp; Conditions"
+                    android:label="Terms and Conditions"
                     android:exported="false"
                     android:theme="@style/Theme.BrightBudsApp"
                     android:parentActivityName=".activities.ParentProfileActivity" />
 
-                <!-- Learning & Utility Modules -->
+                <!-- Learning and Utility Modules -->
                 <activity android:name=".activities.VideoModuleActivity" />
                 <activity android:name=".activities.ReportGenerationActivity" />
                 <activity android:name=".activities.GameModulesActivity" />
                 <activity android:name=".activities.ComingSoonActivity" />
                 <activity android:name=".activities.FeedMonsterActivity" />
-                <activity android:name=".activities.MatchLetterActivity" />
                 <activity android:name=".activities.MemoryMatchActivity" />
                 <activity android:name=".activities.WordBuilderActivity" />
-                <activity
-                    android:name=".activities.ShapesMatchActivity"
+                <activity android:name=".activities.ShapesMatchActivity"
                     android:exported="false" />
+
+                <!-- Match the Letter -->
+                <activity
+                    android:name=".activities.MatchLetterActivity"
+                    android:exported="false"
+                    android:theme="@style/Theme.BrightBudsApp" />
+
+                <!-- Congratulations screen -->
+                <activity
+                    android:name=".activities.CongratulationsActivity"
+                    android:exported="false"
+                    android:theme="@style/Theme.BrightBudsApp" />
+
         </application>
+
 </manifest>

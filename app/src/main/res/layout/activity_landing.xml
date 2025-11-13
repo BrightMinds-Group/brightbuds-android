@@ -65,9 +65,8 @@
                 android:layout_margin="10dp"
                 android:src="@drawable/ic_music"
                 android:contentDescription="ABC Song"
-                android:background="@drawable/bg_tile_rounded"
                 android:padding="0dp"
-                android:scaleType="centerCrop" />
+                android:scaleType="fitCenter" />
 
             <ImageView
                 android:id="@+id/img123Song"
@@ -76,9 +75,8 @@
                 android:layout_margin="10dp"
                 android:src="@drawable/ic_numbers"
                 android:contentDescription="123 Song"
-                android:background="@drawable/bg_tile_rounded"
                 android:padding="0dp"
-                android:scaleType="centerCrop" />
+                android:scaleType="fitCenter" />
         </LinearLayout>
 
         <!-- CTA Buttons -->
